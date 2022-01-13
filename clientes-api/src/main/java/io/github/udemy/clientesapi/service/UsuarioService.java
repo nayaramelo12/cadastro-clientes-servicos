@@ -1,5 +1,7 @@
 package io.github.udemy.clientesapi.service;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,14 +29,18 @@ public class UsuarioService implements UserDetailsService {
 	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException{
-		Usuario usuario = usuarioRepository
-				.findByUsername(username)
-				.orElseThrow(() -> new UsernameNotFoundException("Login não encontrado."));
-		return User
-				.builder()
-				.username(usuario.getUsername())
-				.password(usuario.getPassword())
-				.roles("USER")
-				.build();
+		Optional<Usuario> usuarioOptional = usuarioRepository.findByUsername(username);
+			if (usuarioOptional.isPresent()) {
+				Usuario usuario = usuarioOptional.get();
+				return User
+						.builder()
+						.username(usuario.getUsername())
+						.password(usuario.getPassword())
+						.roles("USER")
+						.build();
+			}else {
+				throw new UsernameNotFoundException("Login não encontrado.");
+			}
+		
 	}
 }
